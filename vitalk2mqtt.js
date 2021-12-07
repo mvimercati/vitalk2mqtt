@@ -1,12 +1,12 @@
 
 var mqtt = require('mqtt');
-var client = mqtt.connect('mqtt://127.0.0.1',{clientId:"vitalk2mqtt",username:"mqtt_user",password:"mqtt"});
+var mqtt_client = mqtt.connect('mqtt://127.0.0.1',{clientId:"vitalk2mqtt",username:"mqtt_user",password:"mqtt"});
 
 var mqtt_connected = false;
 
-client.on('connect', function() {
+mqtt_client.on('connect', function() {
     console.log("MQTT Connected");
-    client.subscribe('Viessmann/Commands/#', function(err) {
+    mqtt_client.subscribe('Viessmann/Commands/#', function(err) {
 	console.log(err);
     });
     console.log("Done");
@@ -20,7 +20,7 @@ client.on('connect', function() {
 
 });
 
-client.on('message', function(topic, message) {
+mqtt_client.on('message', function(topic, message) {
 
     console.log("------- Command topic " + topic + " -> " + message);
     
@@ -167,10 +167,6 @@ setInterval(function() {
 
 setInterval(function() {
 
-//    if (mqtt_connected == false) {
-//	return;
-//    }
-
     var d = new Date();
     var t = d.getTime();
     
@@ -183,6 +179,7 @@ setInterval(function() {
 	}
     }
 }, 1000); // every sec check if some variable needs to be polled
+
 
 function update(key, value)
 {
@@ -221,17 +218,17 @@ function update(key, value)
 	}
 
 	if (cmds[key][8] == null) {
-            client.publish("Viessmann/" + key, value.toString());
+            mqtt_client.publish("Viessmann/" + key, value.toString());
 	} else {
 	    if (value.toString() in cmds[key][8]) {
-		client.publish("Viessmann/" + key, cmds[key][8][value].toString());
+		mqtt_client.publish("Viessmann/" + key, cmds[key][8][value].toString());
 	    } else {
-		client.publish("Viessmann/" + key, value.toString());
+		mqtt_client.publish("Viessmann/" + key, value.toString());
 	    }
 	}
 
 	if (key == "HotWaterTempTarget") {
-            client.publish("Viessmann/HotWaterEnabled", value == 20 ?  "OFF" : "ON");
+            mqtt_client.publish("Viessmann/HotWaterEnabled", value == 20 ?  "OFF" : "ON");
 	}
 
 
