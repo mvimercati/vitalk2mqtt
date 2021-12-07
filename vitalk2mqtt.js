@@ -60,7 +60,6 @@ var last_enabled_temp = "42";
 var queue = [];
 var inhibitDeInputs = false;
 var reenableCounter = 0;
-var lastDEInput = 1;
 
 var cmds = {
     "OutdoorTemp"            : [ null,  60, null, '5525', -2, 10,   1,  0,  null ],
@@ -85,11 +84,11 @@ var cmds = {
 /*  "ReturnTemp"             : [ null,  60, null, '080A', 2, 10,   10, 0,  null ], sempre 20 */
 /*  "WaterFlow"              : [ null,  60, null, '0C24', 2, 1,    1,  0,  null ], sempre 0 */
     "HeatingPumpRPM"         : [ null,  30, null, '7663', 1, 1,    1,  1,  null ],
-/*  "EnableThermostat"       : [ null,  60, null, '773A', 1, 1,    1,  0,  null ], */
 /*  "StartsCounterSolar"     : [ null, 120, null, 'CF50', 4, 1,    1,  0,  null ], */
     "DailySolarEnergy"       : [ null, 300, null, 'CF30', 4, 1000, 10, 0,  null ],
 /*  "RoomTemp"               : [ null,  60, null, '2306', 1, 1,    1,  0,  null ], */
     "ActiveDEInput"          : [ null,  15, null, '27D8', 1, 1,    1,  0,  { "0" : "Inibito", "1" : "Termostato", "3" : "Forzato" }, { "Inibito" : "0", "Termostato" : "1", "Forzato": "3" } ],
+    "DE1InputFunction"       : [ null,  15, null, '773A', 1, 1,    1,  0,  null ],
 /*  "DailySolarEnergyArray0" : [ null,   5, null, 'CF30', 32, 1    1,  0,  null ], */ 
     "SolarPumpRPM"           : [ null,  15, null, 'CFB0', 1, 1,    1,  23, null ],
 /*  "ACSTemp"                : [ null,  20, null, '0814', 2, 10,   10, 0,  null ], */
@@ -193,20 +192,10 @@ function update(key, value)
 	console.log("Enable inputs in a while");
 	if (reenableCounter == 0)
 	{
-	    if (lastDEInput == 0)
-	    {
-		lastDEInput = 1;
-	    }
-	    console.log("Reenable inputs to " + lastDEInput);
+	    console.log("Reenable DE1 input function");
 	    inhibitDeInputs = false;
-	    write("ActiveDEInput", lastDEInput);
+	    write("DE1InputFunction", 1);
 	}
-    }
-
-    if ((inhibitDeInputs == false) && (key == "ActiveDEInput"))
-    {
-	lastDEInput = value;
-	console.log("LastDEInput was " + lastDEInput);
     }
 
     if (cmds[key][2] != value) {
@@ -234,8 +223,8 @@ function update(key, value)
 
 	if ((inhibitDeInputs == false) && (key == "BoilerLoading") && (value == 1))
 	{
-	    console.log("Disable Inputs");
-	    write("ActiveDEInput", 0);
+	    console.log("Disable DE1 input function");
+	    write("DE1InputFunction", 0);
 	    
 	    inhibitDeInputs = true;
 	    reenableCounter = 20;
