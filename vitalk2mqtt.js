@@ -11,12 +11,12 @@ const vitalk_client = net.createConnection({ port: 3083 }, () => {
 var sem = require('semaphore')(1);
 var last_enabled_temp = "42";
 var queue = [];
-var inhibitDeInputs = false;
-var reenableCounter = 0;
+var inhibitDeInputsCountdown = 0;
+
 
 var cmds = {
-    "OutdoorTemp"            : [ null,  60, null, '5525', -2, 10,   1,  0,  null ],
-    "SolarPanelTemp"         : [ null,  10, null, '6564', -2, 10,   1,  0,  null ],
+    "OutdoorTemp"            : [ null,  60, null, '5525', -2, 10,  1,  0,  null ],
+    "SolarPanelTemp"         : [ null,  10, null, '6564', -2, 10,  1,  0,  null ],
     "HotWaterTemp"           : [ null,  10, null, '0804', 2, 10,   1,  0,  null ],
     "HotWaterTempTarget"     : [ null,  30, null, '6300', 1, 1,    1,  0,  null ],
     "BurnerTemp"             : [ null,   5, null, '0802', 2, 10,   1,  0,  null ],
@@ -41,7 +41,7 @@ var cmds = {
     "DailySolarEnergy"       : [ null, 300, null, 'CF30', 4, 1000, 10, 0,  null ],
 /*  "RoomTemp"               : [ null,  60, null, '2306', 1, 1,    1,  0,  null ], */
     "ActiveDEInput"          : [ null,  15, null, '27D8', 1, 1,    1,  0,  { "0" : "Inibito", "1" : "Termostato", "3" : "Forzato" }, { "Inibito" : "0", "Termostato" : "1", "Forzato": "3" } ],
-    "DE1InputFunction"       : [ null,  15, null, '773A', 1, 1,    1,  0,  null ],
+    "DE1InputFunction"       : [ null, 300, null, '773A', 1, 1,    1,  0,  null ],
 /*  "DailySolarEnergyArray0" : [ null,   5, null, 'CF30', 32, 1    1,  0,  null ], */
     "SolarPumpRPM"           : [ null,  15, null, 'CFB0', 1, 1,    1,  23, null ],
 /*  "ACSTemp"                : [ null,  20, null, '0814', 2, 10,   10, 0,  null ], */
@@ -179,15 +179,18 @@ function update(key, value)
     value = Math.round( value * cmds[key][6] ) / cmds[key][6];
 
     
-    if ((inhibitDeInputs == true) && (key == "BoilerLoading") && (value == 0))
+    if ((inhibitDeInputsCountdown > 0) && (key == "BoilerLoading") && (value == 0))
     {
-	reenableCounter--;
-	console.log("Enable inputs in a while");
-	if (reenableCounter == 0)
+	inhibitDeInputsCountdown--;
+
+	if (inhibitDeInputsCountdown == 0)
 	{
 	    console.log("Reenable DE1 input function");
-	    inhibitDeInputs = false;
 	    write("DE1InputFunction", 1);
+	}
+	else
+	{
+	    console.log("Enable inputs in a while");
 	}
     }
 
@@ -214,17 +217,14 @@ function update(key, value)
 	}
 
 
-	if ((inhibitDeInputs == false) && (key == "BoilerLoading") && (value == 1))
+	if ((inhibitDeInputsCountdown == 0) && (key == "BoilerLoading") && (value == 1))
 	{
 	    console.log("Disable DE1 input function");
 	    write("DE1InputFunction", 0);
 	    
-	    inhibitDeInputs = true;
-	    reenableCounter = 20;
-	}
-	
+	    inhibitDeInputsCountdown = 20;
+	}	
     }
-    
 }
 
 function read(key)
