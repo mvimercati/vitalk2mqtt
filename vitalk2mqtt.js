@@ -1,62 +1,15 @@
 
 var mqtt = require('mqtt');
 var mqtt_client = mqtt.connect('mqtt://127.0.0.1',{clientId:"vitalk2mqtt",username:"mqtt_user",password:"mqtt"});
-
 var mqtt_connected = false;
 
-mqtt_client.on('connect', function() {
-    console.log("MQTT Connected");
-    mqtt_client.subscribe('Viessmann/Commands/#', function(err) {
-	console.log(err);
-    });
-    console.log("Done");
-
-    for (var key in cmds) {
-        cmds[key][0] = null;
-	cmds[key][2] = null;
-    }
-
-    mqtt_connected = true;
-
+const net = require('net');
+const vitalk_client = net.createConnection({ port: 3083 }, () => {
+    console.log('Connected to ViTalk server!');
 });
-
-mqtt_client.on('message', function(topic, message) {
-
-    console.log("------- Command topic " + topic + " -> " + message);
-    
-    if (topic.endsWith("HotWaterEnabled"))
-    {
-	if (message == "OFF")
-	{
-	    last_enabled_temp = cmds["HotWaterTempTarget"][2];
-	}
-	write("HotWaterTempTarget", message == "OFF" ? "20" : last_enabled_temp);
-	read("HotWaterTempTarget");
-	return;
-    }
-    
-    if (topic.endsWith("HotWaterTempTarget"))
-    {
-	write("HotWaterTempTarget", message);    
-	read("HotWaterTempTarget");
-	return;
-    }
-
-    if (topic.endsWith("ActiveDEInput"))
-    {
-	write("ActiveDEInput", cmds["ActiveDEInput"][9][message]);
-	read("ActiveDEInput");
-	return;
-    }	        
-});
-
-
 
 var sem = require('semaphore')(1);
-
-var cmd_queue = [];
 var last_enabled_temp = "42";
-
 var queue = [];
 var inhibitDeInputs = false;
 var reenableCounter = 0;
@@ -89,21 +42,61 @@ var cmds = {
 /*  "RoomTemp"               : [ null,  60, null, '2306', 1, 1,    1,  0,  null ], */
     "ActiveDEInput"          : [ null,  15, null, '27D8', 1, 1,    1,  0,  { "0" : "Inibito", "1" : "Termostato", "3" : "Forzato" }, { "Inibito" : "0", "Termostato" : "1", "Forzato": "3" } ],
     "DE1InputFunction"       : [ null,  15, null, '773A', 1, 1,    1,  0,  null ],
-/*  "DailySolarEnergyArray0" : [ null,   5, null, 'CF30', 32, 1    1,  0,  null ], */ 
+/*  "DailySolarEnergyArray0" : [ null,   5, null, 'CF30', 32, 1    1,  0,  null ], */
     "SolarPumpRPM"           : [ null,  15, null, 'CFB0', 1, 1,    1,  23, null ],
 /*  "ACSTemp"                : [ null,  20, null, '0814', 2, 10,   10, 0,  null ], */
 /*  "ComfortTemp"            : [ null,  20, null, '0812', 2, 10,   10, 0,  null  ], */
 };
 
 
-const net = require('net');
+mqtt_client.on('connect', function() {
+    console.log("Connected to MQTT broker");
+    mqtt_client.subscribe('Viessmann/Commands/#', function(err) {
+	console.log(err);
+    });
+    console.log("Done");
 
-const vitalk = net.createConnection({ port: 3083 }, () => {
-    //'connect' listener
-    console.log('connected to server!');
+    for (var key in cmds) {
+        cmds[key][0] = null;
+	cmds[key][2] = null;
+    }
+
+    mqtt_connected = true;
 });
 
-vitalk.on('data', (data) => {
+
+mqtt_client.on('message', function(topic, message) {
+
+    console.log("------- Command topic " + topic + " -> " + message);
+    
+    if (topic.endsWith("HotWaterEnabled"))
+    {
+	if (message == "OFF")
+	{
+	    last_enabled_temp = cmds["HotWaterTempTarget"][2];
+	}
+	write("HotWaterTempTarget", message == "OFF" ? "20" : last_enabled_temp);
+	read("HotWaterTempTarget");
+	return;
+    }
+    
+    if (topic.endsWith("HotWaterTempTarget"))
+    {
+	write("HotWaterTempTarget", message);    
+	read("HotWaterTempTarget");
+	return;
+    }
+
+    if (topic.endsWith("ActiveDEInput"))
+    {
+	write("ActiveDEInput", cmds["ActiveDEInput"][9][message]);
+	read("ActiveDEInput");
+	return;
+    }	        
+});
+
+
+vitalk_client.on('data', (data) => {
 
     if (data.toString().startsWith("Welcome")) {
 	return;
@@ -149,7 +142,7 @@ vitalk.on('data', (data) => {
     update(key, v);
 });
 
-vitalk.on('end', () => {
+vitalk_client.on('end', () => {
     console.log('disconnected from server');
 });
 
@@ -241,7 +234,7 @@ function read(key)
 	console.log("Request " +key);
 	var len = Math.abs(cmds[key][4]) + cmds[key][7];
 	
-	if (vitalk.write("rg "+cmds[key][3]+" "+len+"\n") == true)
+	if (vitalk_client.write("rg "+cmds[key][3]+" "+len+"\n") == true)
 	{
 	    queue.push(key);
 	}
@@ -254,7 +247,7 @@ function write(key, value)
 	
 	value = value * cmds[key][5];
 	console.log("Write " + key + " = " + value);
-	vitalk.write("rs "+cmds[key][3]+" "+value+"\n");
+	vitalk_client.write("rs "+cmds[key][3]+" "+value+"\n");
     });
 }
 
