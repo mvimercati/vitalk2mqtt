@@ -137,7 +137,7 @@ vitalk_client.on('data', (data) => {
 	v = v - 65536;
     }
 
-    console.log("Update " + key + " = " + v + "\n");
+    console.log("Update " + key + " = " + v);
     
     update(key, v);
 });
@@ -170,7 +170,8 @@ setInterval(function() {
 	    read(key);
 	}
     }
-}, 1000); // every sec check if some variable needs to be polled
+    console.log("");
+}, 5000); // every sec check if some variable needs to be polled
 
 
 function update(key, value)
@@ -203,17 +204,17 @@ function update(key, value)
 	}
 
 	if (cmds[key][8] == null) {
-            mqtt_client.publish("Viessmann/" + key, value.toString());
+            mqtt_publish("Viessmann/" + key, value.toString());
 	} else {
 	    if (value.toString() in cmds[key][8]) {
-		mqtt_client.publish("Viessmann/" + key, cmds[key][8][value].toString());
+		mqtt_publish("Viessmann/" + key, cmds[key][8][value].toString());
 	    } else {
-		mqtt_client.publish("Viessmann/" + key, value.toString());
+		mqtt_publish("Viessmann/" + key, value.toString());
 	    }
 	}
 
 	if (key == "HotWaterTempTarget") {
-            mqtt_client.publish("Viessmann/HotWaterEnabled", value == 20 ?  "OFF" : "ON");
+            mqtt_publish("Viessmann/HotWaterEnabled", value == 20 ?  "OFF" : "ON");
 	}
 
 
@@ -227,11 +228,17 @@ function update(key, value)
     }
 }
 
+function mqtt_publish(key, value)
+{
+    console.log("MQTT Publish " + key + " : " + value);
+    mqtt_client.publish(key, value);
+}
+
 function read(key)
 {
     sem.take( function() {
 
-	console.log("Request " +key);
+//	console.log("Request " +key);
 	var len = Math.abs(cmds[key][4]) + cmds[key][7];
 	
 	if (vitalk_client.write("rg "+cmds[key][3]+" "+len+"\n") == true)
