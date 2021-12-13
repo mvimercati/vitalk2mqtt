@@ -44,6 +44,9 @@ var cmds = {
     "DE1InputFunction"       : [ null, 300, null, '773A', 1, 1,    1,  0,  null ],
 /*  "DailySolarEnergyArray0" : [ null,   5, null, 'CF30', 32, 1    1,  0,  null ], */
     "SolarPumpRPM"           : [ null,  15, null, 'CFB0', 1, 1,    1,  23, null ],
+/*  "BoilerOutput"           : [ null,  10, null, '0305', 1, 2,    1,  0,  null ], sempre NaN */
+    "CurveOffset"            : [ null, 300, null, '27D4', 1, 1 ,   1,  0,  null ],
+    "CurveSlope"             : [ null, 300, null, '27D3', 1, 10,   10, 0,  null ],
 /*  "ACSTemp"                : [ null,  20, null, '0814', 2, 10,   10, 0,  null ], */
 /*  "ComfortTemp"            : [ null,  20, null, '0812', 2, 10,   10, 0,  null  ], */
 };
@@ -87,6 +90,20 @@ mqtt_client.on('message', function(topic, message) {
 	return;
     }
 
+    if (topic.endsWith("CurveSlope"))
+    {
+        write("CurveSlope", message);
+        read("CurveSlope");
+        return;
+    }
+
+    if (topic.endsWith("CurveOffset"))
+    {
+        write("CurveOffset", message);
+        read("CurveOffset");
+        return;
+    }
+    
     if (topic.endsWith("ActiveDEInput"))
     {
 	write("ActiveDEInput", cmds["ActiveDEInput"][9][message]);
