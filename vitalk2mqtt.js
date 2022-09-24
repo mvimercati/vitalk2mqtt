@@ -17,7 +17,7 @@ var inhibitDeInputsCountdown = 0;
 var cmds = {
     "OutdoorTemp"            : [ null,  60, null, '5525', -2, 10,  1,  0,  null ],
     "SolarPanelTemp"         : [ null,  10, null, '6564', -2, 10,  1,  0,  null ],
-    "HotWaterTemp"           : [ null,  10, null, '0804', 2, 10,   1,  0,  null ],
+    "HotWaterTemp"           : [ null,  10, null, '0804', 2, 10,   10,  0,  null ],
     "HotWaterTempTarget"     : [ null,  30, null, '6300', 1, 1,    1,  0,  null ],
     "BurnerTemp"             : [ null,   5, null, '0802', 2, 10,   1,  0,  null ],
     "HeatingTempTarget"      : [ null,  60, null, '555A', 2, 10,   1,  0,  null ],
@@ -49,6 +49,8 @@ var cmds = {
     "CurveSlope"             : [ null, 300, null, '27D3', 1, 10,   10, 0,  null ],
 /*  "ACSTemp"                : [ null,  20, null, '0814', 2, 10,   10, 0,  null ], */
 /*  "ComfortTemp"            : [ null,  20, null, '0812', 2, 10,   10, 0,  null  ], */
+/*    "Temp9b"                 : [ null, 300, null, '779b', 1, 1,    1,  0,  null ],*/
+/*    "ExtCfg"                 : [ null, 300, null, '7750', 1, 1,    1,  0,  null ],*/
 };
 
 
@@ -71,7 +73,7 @@ mqtt_client.on('connect', function() {
 mqtt_client.on('message', function(topic, message) {
 
     console.log("------- Command topic " + topic + " -> " + message);
-    
+
     if (topic.endsWith("HotWaterEnabled"))
     {
 	if (message == "OFF")
@@ -82,10 +84,10 @@ mqtt_client.on('message', function(topic, message) {
 	read("HotWaterTempTarget");
 	return;
     }
-    
+
     if (topic.endsWith("HotWaterTempTarget"))
     {
-	write("HotWaterTempTarget", message);    
+	write("HotWaterTempTarget", message);
 	read("HotWaterTempTarget");
 	return;
     }
@@ -101,6 +103,13 @@ mqtt_client.on('message', function(topic, message) {
     {
         write("CurveOffset", message);
         read("CurveOffset");
+        return;
+    }
+
+    if (topic.endsWith("Temp9b"))
+    {
+        write("Temp9b", message);
+        read("Temp9b");
         return;
     }
     
@@ -188,6 +197,9 @@ setInterval(function() {
 	}
     }
     console.log("");
+
+// write("Temp9b", 70);
+// write("ExtCfg",3);
 }, 5000); // every sec check if some variable needs to be polled
 
 
