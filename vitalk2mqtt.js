@@ -47,6 +47,7 @@ var cmds = {
 /*  "BoilerOutput"           : [ null,  10, null, '0305', 1, 2,    1,  0,  null ], sempre NaN */
     "CurveOffset"            : [ null, 300, null, '27D4', 1, 1 ,   1,  0,  null ],
     "CurveSlope"             : [ null, 300, null, '27D3', 1, 10,   10, 0,  null ],
+    "HotWaterSup"            : [ null, 300, null, '6758', 1, 1,    1,  0,  null ],
 /*  "ACSTemp"                : [ null,  20, null, '0814', 2, 10,   10, 0,  null ], */
 /*  "ComfortTemp"            : [ null,  20, null, '0812', 2, 10,   10, 0,  null  ], */
 /*    "Temp9b"                 : [ null, 300, null, '779b', 1, 1,    1,  0,  null ],*/
@@ -85,6 +86,12 @@ mqtt_client.on('message', function(topic, message) {
 	return;
     }
 
+    if (topic.endsWith("HotWaterSupEnabled"))
+    {
+	write("HotWaterSup", message == "OFF" ? "0" : "40");
+	read("HotWaterSup");
+    }
+    
     if (topic.endsWith("HotWaterTempTarget"))
     {
 	write("HotWaterTempTarget", message);
@@ -244,6 +251,10 @@ function update(key, value)
 
 	if (key == "HotWaterTempTarget") {
             mqtt_publish("Viessmann/HotWaterEnabled", value == 20 ?  "OFF" : "ON");
+	}
+
+	if (key == "HotWaterSup") {
+	    mqtt_publish("Viessmann/HotWaterSupEnabled", value == 0 ? "OFF" : "ON");
 	}
 
 
