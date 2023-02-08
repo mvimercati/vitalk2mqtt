@@ -99,41 +99,21 @@ mqtt_client.on('message', function(topic, message) {
 	write("HotWaterSup", message == "OFF" ? "0" : "40");
 	read("HotWaterSup");
     }
-    
-    if (topic.endsWith("HotWaterTempTarget"))
-    {
-	write("HotWaterTempTarget", message);
-	read("HotWaterTempTarget");
-	return;
-    }
 
-    if (topic.endsWith("CurveSlope"))
-    {
-        write("CurveSlope", message);
-        read("CurveSlope");
-        return;
-    }
 
-    if (topic.endsWith("CurveOffset"))
-    {
-        write("CurveOffset", message);
-        read("CurveOffset");
-        return;
-    }
-
-    if (topic.endsWith("Temp9b"))
-    {
-        write("Temp9b", message);
-        read("Temp9b");
-        return;
-    }
-    
     if (topic.endsWith("ActiveDEInput"))
     {
-	write("ActiveDEInput", cmds["ActiveDEInput"][9][message]);
-	read("ActiveDEInput");
-	return;
-    }	        
+        write("ActiveDEInput", cmds["ActiveDEInput"][9][message]);
+        read("ActiveDEInput");
+        return;
+    }
+    
+    parts = topic.split("/");
+    topic_lastpart = parts[parts.length - 1];
+    
+    write(topic_lastpart, message);
+    read(topic_lastpart);
+    
 });
 
 
@@ -178,7 +158,7 @@ vitalk_client.on('data', (data) => {
 	v = v - 65536;
     }
 
-    console.log("Update " + key + " = " + v);
+    //console.log("Update " + key + " = " + v);
     
     update(key, v);
 });
@@ -211,7 +191,7 @@ setInterval(function() {
 	    read(key);
 	}
     }
-    console.log("");
+//    console.log("");
 
 // write("Temp9b", 70);
 // write("ExtCfg",3);
