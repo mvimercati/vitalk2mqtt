@@ -18,6 +18,7 @@ var cmds = {
     "OutdoorTemp"            : [ null,  60, null, '5525', -2, 10,  1,  0,  null ],
     "SolarPanelTemp"         : [ null,  10, null, '6564', -2, 10,  1,  0,  null ],
     "HotWaterTemp"           : [ null,  10, null, '0804', 2, 10,   10,  0,  null ],
+    "HotWaterOutTemp"        : [ null,  10, null, '0806', 2, 10,   10,  0,  null ],
     "HotWaterTempTarget"     : [ null,  30, null, '6300', 1, 1,    1,  0,  null ],
     "BurnerTemp"             : [ null,   5, null, '0802', 2, 10,   1,  0,  null ],
     "HeatingTempTarget"      : [ null,  60, null, '555A', 2, 10,   1,  0,  null ],
@@ -51,7 +52,14 @@ var cmds = {
 /*  "ACSTemp"                : [ null,  20, null, '0814', 2, 10,   10, 0,  null ], */
 /*  "ComfortTemp"            : [ null,  20, null, '0812', 2, 10,   10, 0,  null  ], */
 /*    "Temp9b"                 : [ null, 300, null, '779b', 1, 1,    1,  0,  null ],*/
-/*    "ExtCfg"                 : [ null, 300, null, '7750', 1, 1,    1,  0,  null ],*/
+    /*    "ExtCfg"                 : [ null, 300, null, '7750', 1, 1,    1,  0,  null ],*/
+    "Solar_dT_On_pump"       : [ null, 300, null, 'CF00', 1, 1,    1,  0,  null ],
+    "Solar_dT_Off_pump"      : [ null, 300, null, 'CF01', 1, 1,    1,  0,  null ],
+    "Solar_dT_CtrlVarStart"  : [ null, 300, null, 'CF03', 1, 1,    1,  0,  null ],
+    "Solar_Inc_per_K"        : [ null, 300, null, 'CF04', 1, 1,    1,  0,  null ],
+    "Solar_RPM_Min"          : [ null, 300, null, 'CF05', 1, 1,    1,  0,  null ],
+    "Solar_RPM_Max"          : [ null, 300, null, 'CF06', 1, 1,    1,  0,  null ],
+    "Solar_T_Min"            : [ null, 300, null, 'CF12', 1, 1,    1,  0,  null ],
 };
 
 
