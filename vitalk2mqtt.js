@@ -41,7 +41,7 @@ var cmds = {
 /*  "StartsCounterSolar"     : [ null, 120, null, 'CF50', 4, 1,    1,  0,  null ], */
     "DailySolarEnergy"       : [ null, 300, null, 'CF30', 4, 1000, 10, 0,  null ],
 /*  "RoomTemp"               : [ null,  60, null, '2306', 1, 1,    1,  0,  null ], */
-    "ActiveDEInput"          : [ null,  15, null, '27D8', 1, 1,    1,  0,  { "0" : "Inibito", "1" : "Termostato", "3" : "Forzato" }, { "Inibito" : "0", "Termostato" : "1", "Forzato": "3" } ],
+    "ActiveDEInput"          : [ null,  15, null, '27D8', 1, 1,    1,  0,  { "0" : "Inibito", "3" : "Termostato", "2" : "Forzato" }, { "Inibito" : "0", "Termostato" : "3", "Forzato": "2" } ],
     "DE1InputFunction"       : [ null, 300, null, '773A', 1, 1,    1,  0,  null ],
 /*  "DailySolarEnergyArray0" : [ null,   5, null, 'CF30', 32, 1    1,  0,  null ], */
     "SolarPumpRPM"           : [ null,  15, null, 'CFB0', 1, 1,    1,  23, null ],
